@@ -4,31 +4,40 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "9471947945ccef1c947b982112c9df5e",
+    "content-hash": "1a832c22b70fb5317a1e56645f1f80bb",
     "packages": [
         {
-            "name": "contenir/config",
-            "version": "v0.2.0",
+            "name": "contenir/contenir-config",
+            "version": "v2.1.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/contenir/config.git",
-                "reference": "093d57913a57498139274191721b9740cadc1727"
+                "url": "https://github.com/contenir/contenir-config.git",
+                "reference": "b55a505ec66f049b96265334e24b94a75917cfa2"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/contenir/config/zipball/093d57913a57498139274191721b9740cadc1727",
-                "reference": "093d57913a57498139274191721b9740cadc1727",
+                "url": "https://api.github.com/repos/contenir/contenir-config/zipball/b55a505ec66f049b96265334e24b94a75917cfa2",
+                "reference": "b55a505ec66f049b96265334e24b94a75917cfa2",
                 "shasum": ""
             },
             "require": {
-                "php": "^8.1 || ^8.2 || ^8.3",
+                "php": "~8.3.0 || ~8.4.0 || ~8.5.0",
                 "webimpress/safe-writer": "^2.2"
             },
+            "replace": {
+                "contenir/config": "self.version"
+            },
             "require-dev": {
-                "phpunit/phpunit": "^11.0",
-                "squizlabs/php_codesniffer": "^3.10"
+                "infection/infection": "^0.34.1",
+                "php-db/phpdb-qa-tools": "0.1.x-dev",
+                "phpunit/phpunit": "^11.5.42"
             },
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "2.1.x-dev"
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "Contenir\\Config\\": "src/"
@@ -40,37 +49,43 @@
             ],
             "description": "Framework-agnostic PHP-array config file reader/writer with atomic writes and opcache invalidation. Adapted from Laminas\\Config.",
             "support": {
-                "issues": "https://github.com/contenir/config/issues",
-                "source": "https://github.com/contenir/config/tree/v0.2.0"
+                "issues": "https://github.com/contenir/contenir-config/issues",
+                "source": "https://github.com/contenir/contenir-config/tree/v2.1.0"
             },
-            "time": "2026-05-08T03:37:56+00:00"
+            "time": "2026-10-05T13:35:11+00:00"
         },
         {
-            "name": "contenir/errors",
-            "version": "v0.1.1",
+            "name": "contenir/contenir-errors",
+            "version": "v2.1.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/contenir/errors.git",
-                "reference": "6770e348100680690c8e04961a5a8b2be88bb30e"
+                "url": "https://github.com/contenir/contenir-errors.git",
+                "reference": "80a70e0d75cb3fe194993fcdb7ec372bde1f0c4d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/contenir/errors/zipball/6770e348100680690c8e04961a5a8b2be88bb30e",
-                "reference": "6770e348100680690c8e04961a5a8b2be88bb30e",
+                "url": "https://api.github.com/repos/contenir/contenir-errors/zipball/80a70e0d75cb3fe194993fcdb7ec372bde1f0c4d",
+                "reference": "80a70e0d75cb3fe194993fcdb7ec372bde1f0c4d",
                 "shasum": ""
             },
             "require": {
-                "php": "^8.1 || ^8.2 || ^8.3"
+                "contenir/contenir-config": "^2.1",
+                "php": "~8.3.0 || ~8.4.0 || ~8.5.0"
+            },
+            "replace": {
+                "contenir/errors": "self.version"
             },
             "require-dev": {
-                "contenir/config": "^0.1.0",
-                "phpunit/phpunit": "^11.0",
-                "squizlabs/php_codesniffer": "^3.10"
-            },
-            "suggest": {
-                "contenir/config": "Required if you intend to use Repository\\FileRepository (admin-side writer). Sites that read state from the merged Laminas/Mezzio config — and use Repository\\InMemoryRepository — don't need it."
+                "infection/infection": "^0.34.1",
+                "php-db/phpdb-qa-tools": "0.1.x-dev",
+                "phpunit/phpunit": "^11.5.42"
             },
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-main": "2.1.x-dev"
+                }
+            },
             "autoload": {
                 "psr-4": {
                     "Contenir\\Errors\\": "src/"
@@ -82,10 +97,10 @@
             ],
             "description": "Framework-agnostic admin-authored error-page content for Contenir CMS — admin writes per-status titles and bodies, Site renders.",
             "support": {
-                "issues": "https://github.com/contenir/errors/issues",
-                "source": "https://github.com/contenir/errors/tree/v0.1.1"
+                "issues": "https://github.com/contenir/contenir-errors/issues",
+                "source": "https://github.com/contenir/contenir-errors/tree/v2.1.0"
             },
-            "time": "2026-05-08T03:37:56+00:00"
+            "time": "2026-10-05T20:09:33+00:00"
         },
         {
             "name": "laminas/laminas-diactoros",
