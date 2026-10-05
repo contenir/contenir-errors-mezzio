@@ -21,6 +21,18 @@ No code or configuration changes are needed. `ConfigProvider`,
 `Exception\InvalidConfigurationException` keep their signatures, constants
 and behaviour, and every `config['errors']` key means what it did in 0.1.
 
+## Final classes
+
+Every concrete class is `final`, as it already was in 0.1. To change
+behaviour, use the extension points instead of subclassing:
+
+- `ViewStateResetInterface`, passed to `ErrorPageMiddleware`, to clear another
+  template engine's leftover state,
+- `Contenir\Errors\ErrorPageRepositoryInterface` (registered in the
+  container) for a different source of pages,
+- `errors.view_template` and `errors.layout` for the markup,
+- any PSR-3 logger named by `errors.logger`.
+
 ## Dependency floors
 
 `contenir/errors` 0.1.0 is no longer accepted: it reads a flat pages file,
