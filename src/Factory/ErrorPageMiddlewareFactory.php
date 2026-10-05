@@ -8,7 +8,10 @@ use Contenir\Errors\ErrorPageRepositoryInterface;
 use Contenir\Errors\Mezzio\ErrorPageMiddleware;
 use Contenir\Errors\Mezzio\ErrorPageOptions;
 use Contenir\Errors\Mezzio\Exception\InvalidConfigurationException;
+use Contenir\Errors\Mezzio\LaminasView\PlaceholderReset;
+use Contenir\Errors\Mezzio\ViewStateResetInterface;
 use Contenir\Errors\Repository\FileRepository;
+use Laminas\View\HelperPluginManager;
 use Mezzio\Template\TemplateRendererInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
@@ -50,7 +53,20 @@ final class ErrorPageMiddlewareFactory
             renderer: $container->get(TemplateRendererInterface::class),
             logger: $this->resolveLogger($container, $errors),
             options: ErrorPageOptions::fromConfig($errors),
+            viewStateReset: $this->resolveViewStateReset($container),
         );
+    }
+
+    /**
+     * Clears laminas-view's placeholders when the site renders with laminas-view
+     */
+    private function resolveViewStateReset(ContainerInterface $container): ?ViewStateResetInterface
+    {
+        if (! $container->has(HelperPluginManager::class)) {
+            return null;
+        }
+
+        return new PlaceholderReset($container->get(HelperPluginManager::class));
     }
 
     /**

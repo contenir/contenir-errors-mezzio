@@ -199,6 +199,18 @@ it with `<?= $body ?>`.
   fragment, so pair `false` with a `view_template` of your own that
   outputs a complete document.
 
+## Leftover view state
+
+The admin's page usually renders after the site has already rendered its own (the
+NotFoundHandler's 404, the ErrorHandler's 500) in the same request. laminas-view's
+head and script helpers keep what that first render added, so the error page would
+repeat its title, meta tags and scripts. When the container has
+`Laminas\View\HelperPluginManager` (any mezzio-laminasviewrenderer site), the factory
+wires `LaminasView\PlaceholderReset`, which empties `headTitle`, `headMeta`,
+`headLink`, `headScript`, `headStyle` and `inlineScript` just before the page renders.
+Another engine with the same problem can pass its own `ViewStateResetInterface` to the
+middleware.
+
 ## License
 
 MIT. See [LICENSE](LICENSE).

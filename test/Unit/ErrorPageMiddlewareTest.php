@@ -7,6 +7,7 @@ namespace Contenir\Errors\Mezzio\Test\Unit;
 use Contenir\Errors\ErrorPage;
 use Contenir\Errors\Mezzio\ErrorPageMiddleware;
 use Contenir\Errors\Mezzio\ErrorPageOptions;
+use Contenir\Errors\Mezzio\Test\TestAsset\CountingViewStateReset;
 use Contenir\Errors\Mezzio\Test\TestAsset\FakeTemplateRenderer;
 use Contenir\Errors\Mezzio\Test\TestAsset\FixedResponseHandler;
 use Contenir\Errors\Mezzio\Test\TestAsset\InMemoryLogger;
@@ -345,6 +346,39 @@ final class ErrorPageMiddlewareTest extends TestCase
     private function middleware(): ErrorPageMiddleware
     {
         return new ErrorPageMiddleware($this->repository, $this->renderer);
+    }
+
+    public function testClearsViewStateBeforeRenderingThePage(): void
+    {
+        $reset      = new CountingViewStateReset();
+        $middleware = new ErrorPageMiddleware($this->repository, $this->renderer, viewStateReset: $reset);
+
+        $this->process($middleware, new HtmlResponse('', 404));
+
+        self::assertSame(1, $reset->resets);
+    }
+
+    #[DataProvider('untouchedResponseProvider')]
+    public function testLeavesViewStateAloneWhenThePageIsNotRendered(ResponseInterface $response): void
+    {
+        $reset      = new CountingViewStateReset();
+        $middleware = new ErrorPageMiddleware($this->repository, $this->renderer, viewStateReset: $reset);
+
+        $this->process($middleware, $response);
+
+        self::assertSame(0, $reset->resets);
+    }
+
+    /**
+     * @return array<string, array{ResponseInterface}>
+     */
+    public static function untouchedResponseProvider(): array
+    {
+        return [
+            'success'            => [new HtmlResponse('ok')],
+            'no page for status' => [new HtmlResponse('', 410)],
+            'json error'         => [new JsonResponse(['error' => 'missing'], 404)],
+        ];
     }
 
     private function process(ErrorPageMiddleware $middleware, ResponseInterface $response): ResponseInterface

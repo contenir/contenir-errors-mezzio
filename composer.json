@@ -26,6 +26,9 @@
         "php-db/phpdb-qa-tools": "0.1.x-dev",
         "phpunit/phpunit": "^11.5"
     },
+    "suggest": {
+        "laminas/laminas-view": "Clears its head and script placeholders before the error page renders (mezzio-laminasviewrenderer sites)"
+    },
     "minimum-stability": "dev",
     "prefer-stable": true,
     "autoload": {

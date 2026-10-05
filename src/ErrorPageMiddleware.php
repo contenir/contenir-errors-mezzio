@@ -51,6 +51,7 @@ final readonly class ErrorPageMiddleware implements MiddlewareInterface
         private TemplateRendererInterface $renderer,
         private ?LoggerInterface $logger = null,
         private ErrorPageOptions $options = new ErrorPageOptions(),
+        private ?ViewStateResetInterface $viewStateReset = null,
     ) {}
 
     #[Override]
@@ -95,6 +96,8 @@ final readonly class ErrorPageMiddleware implements MiddlewareInterface
         if (null !== $this->options->layout) {
             $params['layout'] = $this->options->layout;
         }
+
+        $this->viewStateReset?->reset();
 
         $html = $this->renderer->render($this->options->viewTemplate, $params);
 
