@@ -1,5 +1,8 @@
 # contenir/errors-mezzio
 
+[![Continuous Integration](https://github.com/contenir/errors-mezzio/actions/workflows/continuous-integration.yml/badge.svg)](https://github.com/contenir/errors-mezzio/actions/workflows/continuous-integration.yml)
+[![codecov](https://codecov.io/gh/contenir/errors-mezzio/graph/badge.svg)](https://codecov.io/gh/contenir/errors-mezzio)
+
 Mezzio (PSR-15) adapter for [`contenir/errors`](https://github.com/contenir/errors).
 The sibling of [`contenir/errors-laminas-mvc`](https://github.com/contenir/errors-laminas-mvc).
 
@@ -7,6 +10,18 @@ Re-renders 4xx/5xx HTML responses with the admin-authored page for their
 status. Non-invasive on first install — when the admin hasn't authored a
 page for a given status, the response Mezzio produced passes through
 unchanged.
+
+## Requirements
+
+- PHP 8.3, 8.4 or 8.5
+- `contenir/errors` 0.1.1+ or 2.x, `contenir/config` 0.2 or 2.x
+- `mezzio/mezzio-template` 2.x, `laminas/laminas-diactoros` 3.x, PSR-3, PSR-7,
+  PSR-11 and PSR-15
+- Optional: `laminas/laminas-view`, to clear its placeholders before the page
+  renders (see [Leftover view state](#leftover-view-state))
+
+The 0.x releases remain available from the `0.x` branch and `v0.*` tags; see
+[UPGRADE-2.0.md](UPGRADE-2.0.md).
 
 ## Install
 
@@ -210,6 +225,49 @@ wires `LaminasView\PlaceholderReset`, which empties `headTitle`, `headMeta`,
 `headLink`, `headScript`, `headStyle` and `inlineScript` just before the page renders.
 Another engine with the same problem can pass its own `ViewStateResetInterface` to the
 middleware.
+
+## Public API
+
+| Class | Purpose |
+|-------|---------|
+| `ConfigProvider` | `__invoke()`, `getDependencies()` and `getTemplates()` register the factory and the `contenir-errors` template namespace (`TEMPLATE_NAMESPACE`). |
+| `Factory\ErrorPageMiddlewareFactory` | Builds the middleware from `config['errors']`. `DEFAULT_FILE` is the pages file relative to the working directory. |
+| `ErrorPageMiddleware` | The PSR-15 middleware. Constructor: `(ErrorPageRepositoryInterface $repository, TemplateRendererInterface $renderer, ?LoggerInterface $logger = null, ErrorPageOptions $options = new ErrorPageOptions(), ?ViewStateResetInterface $viewStateReset = null)`. |
+| `ErrorPageOptions` | `viewTemplate`, `layout` and `debug`. `fromConfig(array $errors)` reads them from `config['errors']`; `DEFAULT_VIEW_TEMPLATE` is `contenir-errors::fault`. |
+| `ViewStateResetInterface` | `reset(): void`, called just before the page renders. |
+| `LaminasView\PlaceholderReset` | The laminas-view implementation; `HELPERS` lists the placeholders it empties. |
+| `Exception\InvalidConfigurationException` | Thrown when the container builds the middleware if a `config['errors']` value has the wrong type (for example `view_template` set to `''`, `debug` set to `'yes'`), or `logger` names a service that is not a PSR-3 logger. A misconfigured site fails on its first request, not its first error. |
+
+Building the middleware without the factory:
+
+```php
+use Contenir\Errors\Mezzio\ErrorPageMiddleware;
+use Contenir\Errors\Mezzio\ErrorPageOptions;
+use Contenir\Errors\Repository\FileRepository;
+use Mezzio\Template\TemplateRendererInterface;
+
+$middleware = new ErrorPageMiddleware(
+    repository: new FileRepository('/var/www/site/config/autoload/errors.local.php'),
+    renderer: $container->get(TemplateRendererInterface::class),
+    logger: $logger,
+    options: new ErrorPageOptions(viewTemplate: 'error::fault', layout: 'layout::error'),
+);
+```
+
+## Development
+
+The QA toolchain is [php-db/phpdb-qa-tools](https://github.com/php-db/phpdb-qa-tools).
+[Mago](https://mago.carthage.software/) is a standalone binary, installed
+separately (`brew install mago`).
+
+```bash
+composer check             # everything below
+composer cs-check          # mago format --check && mago lint
+composer static-analysis   # mago analyze
+composer test              # unit suite: middleware, options and factory with doubles, no I/O
+composer test-integration  # integration suite: real pages files, laminas-view and the bundled template
+composer test-coverage     # both suites, clover.xml for Codecov
+```
 
 ## License
 

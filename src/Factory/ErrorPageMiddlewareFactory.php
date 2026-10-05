@@ -13,6 +13,7 @@ use Contenir\Errors\Mezzio\ViewStateResetInterface;
 use Contenir\Errors\Repository\FileRepository;
 use Laminas\View\HelperPluginManager;
 use Mezzio\Template\TemplateRendererInterface;
+use Psr\Container\ContainerExceptionInterface;
 use Psr\Container\ContainerInterface;
 use Psr\Log\LoggerInterface;
 
@@ -42,100 +43,13 @@ final class ErrorPageMiddlewareFactory
     public const string DEFAULT_FILE = '/config/autoload/errors.local.php';
 
     /**
-     * @throws InvalidConfigurationException When a config['errors'] value, or the logger it names, has the wrong type.
+     * The site's own autoload file, where the Contenir admin writes the pages.
      */
-    public function __invoke(ContainerInterface $container): ErrorPageMiddleware
+    private static function defaultFile(): string
     {
-        $errors = $container->has('config') ? $this->errorsConfig($container->get('config')) : [];
+        $workingDirectory = getcwd();
 
-        return new ErrorPageMiddleware(
-            repository: $this->resolveRepository($container, $errors),
-            renderer: $container->get(TemplateRendererInterface::class),
-            logger: $this->resolveLogger($container, $errors),
-            options: ErrorPageOptions::fromConfig($errors),
-            viewStateReset: $this->resolveViewStateReset($container),
-        );
-    }
-
-    /**
-     * Clears laminas-view's placeholders when the site renders with laminas-view
-     */
-    private function resolveViewStateReset(ContainerInterface $container): ?ViewStateResetInterface
-    {
-        if (! $container->has(HelperPluginManager::class)) {
-            return null;
-        }
-
-        return new PlaceholderReset($container->get(HelperPluginManager::class));
-    }
-
-    /**
-     * @return array<array-key, mixed>
-     *
-     * @throws InvalidConfigurationException When config['errors'] is not an array.
-     */
-    private function errorsConfig(mixed $config): array
-    {
-        if (! is_array($config) || null === ($config['errors'] ?? null)) {
-            return [];
-        }
-
-        if (! is_array($config['errors'])) {
-            throw new InvalidConfigurationException('contenir/errors-mezzio: config[errors] must be an array.');
-        }
-
-        return $config['errors'];
-    }
-
-    /**
-     * A repository registered in the container wins. Otherwise the pages are
-     * read from the admin's PHP file on every lookup rather than from merged
-     * config: Mezzio caches merged config in production, so content the admin
-     * saves would not appear until that cache was cleared.
-     *
-     * @param array<array-key, mixed> $errors
-     *
-     * @throws InvalidConfigurationException When the file option is not a non-empty string.
-     */
-    private function resolveRepository(ContainerInterface $container, array $errors): ErrorPageRepositoryInterface
-    {
-        if ($container->has(ErrorPageRepositoryInterface::class)) {
-            return $container->get(ErrorPageRepositoryInterface::class);
-        }
-
-        return new FileRepository(self::optionalString($errors, 'file', 'a non-empty string') ?? self::defaultFile());
-    }
-
-    /**
-     * @param array<array-key, mixed> $errors
-     *
-     * @throws InvalidConfigurationException When the option is not a service name, or names a non-logger.
-     */
-    private function resolveLogger(ContainerInterface $container, array $errors): ?LoggerInterface
-    {
-        $name = self::optionalString($errors, 'logger', 'null or a container service name');
-        if (null === $name) {
-            return null;
-        }
-
-        return $this->asLogger($container->get($name), $name);
-    }
-
-    /**
-     * @throws InvalidConfigurationException When the service is not a PSR-3 logger.
-     */
-    private function asLogger(mixed $service, string $name): LoggerInterface
-    {
-        if (! $service instanceof LoggerInterface) {
-            throw new InvalidConfigurationException(sprintf(
-                'contenir/errors-mezzio: logger service "%s" must implement %s, got %s.',
-                $name,
-                LoggerInterface::class,
-                get_debug_type($service),
-            ));
-        }
-
-        return $service;
+        return (false === $workingDirectory ? '.' : $workingDirectory) . self::DEFAULT_FILE;
     }
 
     /**
@@ -164,12 +78,104 @@ final class ErrorPageMiddlewareFactory
     }
 
     /**
-     * The site's own autoload file, where the Contenir admin writes the pages.
+     * @throws InvalidConfigurationException When the service is not a PSR-3 logger.
      */
-    private static function defaultFile(): string
+    private function asLogger(mixed $service, string $name): LoggerInterface
     {
-        $workingDirectory = getcwd();
+        if (! $service instanceof LoggerInterface) {
+            throw new InvalidConfigurationException(sprintf(
+                'contenir/errors-mezzio: logger service "%s" must implement %s, got %s.',
+                $name,
+                LoggerInterface::class,
+                get_debug_type($service),
+            ));
+        }
 
-        return (false === $workingDirectory ? '.' : $workingDirectory) . self::DEFAULT_FILE;
+        return $service;
+    }
+
+    /**
+     * @return array<array-key, mixed>
+     *
+     * @throws InvalidConfigurationException When config['errors'] is not an array.
+     */
+    private function errorsConfig(mixed $config): array
+    {
+        if (! is_array($config) || null === ($config['errors'] ?? null)) {
+            return [];
+        }
+
+        if (! is_array($config['errors'])) {
+            throw new InvalidConfigurationException('contenir/errors-mezzio: config[errors] must be an array.');
+        }
+
+        return $config['errors'];
+    }
+
+    /**
+     * @param array<array-key, mixed> $errors
+     *
+     * @throws InvalidConfigurationException When the option is not a service name, or names a non-logger.
+     * @throws ContainerExceptionInterface When the named logger cannot be built.
+     */
+    private function resolveLogger(ContainerInterface $container, array $errors): ?LoggerInterface
+    {
+        $name = self::optionalString($errors, 'logger', 'null or a container service name');
+        if (null === $name) {
+            return null;
+        }
+
+        return $this->asLogger($container->get($name), $name);
+    }
+
+    /**
+     * A repository registered in the container wins. Otherwise the pages are
+     * read from the admin's PHP file on every lookup rather than from merged
+     * config: Mezzio caches merged config in production, so content the admin
+     * saves would not appear until that cache was cleared.
+     *
+     * @param array<array-key, mixed> $errors
+     *
+     * @throws InvalidConfigurationException When the file option is not a non-empty string.
+     * @throws ContainerExceptionInterface When the registered repository cannot be built.
+     */
+    private function resolveRepository(ContainerInterface $container, array $errors): ErrorPageRepositoryInterface
+    {
+        if ($container->has(ErrorPageRepositoryInterface::class)) {
+            return $container->get(ErrorPageRepositoryInterface::class);
+        }
+
+        return new FileRepository(self::optionalString($errors, 'file', 'a non-empty string') ?? self::defaultFile());
+    }
+
+    /**
+     * Clears laminas-view's placeholders when the site renders with laminas-view
+     *
+     * @throws ContainerExceptionInterface When the helper plugin manager cannot be built.
+     */
+    private function resolveViewStateReset(ContainerInterface $container): ?ViewStateResetInterface
+    {
+        if (! $container->has(HelperPluginManager::class)) {
+            return null;
+        }
+
+        return new PlaceholderReset($container->get(HelperPluginManager::class));
+    }
+
+    /**
+     * @throws InvalidConfigurationException When a config['errors'] value, or the logger it names, has the wrong type.
+     * @throws ContainerExceptionInterface When a service the factory reads cannot be built.
+     */
+    public function __invoke(ContainerInterface $container): ErrorPageMiddleware
+    {
+        $errors = $container->has('config') ? $this->errorsConfig($container->get('config')) : [];
+
+        return new ErrorPageMiddleware(
+            repository: $this->resolveRepository($container, $errors),
+            renderer: $container->get(TemplateRendererInterface::class),
+            logger: $this->resolveLogger($container, $errors),
+            options: ErrorPageOptions::fromConfig($errors),
+            viewStateReset: $this->resolveViewStateReset($container),
+        );
     }
 }

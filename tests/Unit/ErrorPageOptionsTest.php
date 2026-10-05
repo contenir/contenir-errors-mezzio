@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Contenir\Errors\Mezzio\Test\Unit;
+namespace Contenir\Errors\Mezzio\Tests\Unit;
 
 use Contenir\Errors\Mezzio\ErrorPageOptions;
 use Contenir\Errors\Mezzio\Exception\InvalidConfigurationException;
@@ -13,6 +13,27 @@ use PHPUnit\Framework\TestCase;
 #[Group('unit')]
 final class ErrorPageOptionsTest extends TestCase
 {
+    /**
+     * @return array<string, array{array<string, mixed>, string}>
+     */
+    public static function invalidConfigProvider(): array
+    {
+        return [
+            'view template is empty'      => [['view_template' => ''], 'config[errors][view_template] must be'],
+            'view template is not string' => [['view_template' => 42], 'config[errors][view_template] must be'],
+            'layout is true'              => [['layout' => true], 'config[errors][layout] must be'],
+            'layout is empty'             => [['layout' => ''], 'config[errors][layout] must be'],
+            'layout is not a string'      => [['layout' => 42], 'config[errors][layout] must be'],
+            'debug is a string'           => [['debug' => 'true'], 'config[errors][debug] must be a boolean'],
+            'debug is an integer'         => [['debug' => 1], 'config[errors][debug] must be a boolean'],
+        ];
+    }
+
+    public function testAcceptsADisabledLayout(): void
+    {
+        self::assertFalse(ErrorPageOptions::fromConfig(['layout' => false])->layout);
+    }
+
     public function testAppliesTheDefaultsToAnEmptyConfig(): void
     {
         self::assertEquals(
@@ -33,16 +54,6 @@ final class ErrorPageOptionsTest extends TestCase
         );
     }
 
-    public function testTreatsANullLayoutAsTheRendererDefault(): void
-    {
-        self::assertNull(ErrorPageOptions::fromConfig(['layout' => null])->layout);
-    }
-
-    public function testAcceptsADisabledLayout(): void
-    {
-        self::assertFalse(ErrorPageOptions::fromConfig(['layout' => false])->layout);
-    }
-
     /**
      * @param array<string, mixed> $errors
      */
@@ -55,19 +66,8 @@ final class ErrorPageOptionsTest extends TestCase
         ErrorPageOptions::fromConfig($errors);
     }
 
-    /**
-     * @return array<string, array{array<string, mixed>, string}>
-     */
-    public static function invalidConfigProvider(): array
+    public function testTreatsANullLayoutAsTheRendererDefault(): void
     {
-        return [
-            'view template is empty'      => [['view_template' => ''], 'config[errors][view_template] must be'],
-            'view template is not string' => [['view_template' => 42], 'config[errors][view_template] must be'],
-            'layout is true'              => [['layout' => true], 'config[errors][layout] must be'],
-            'layout is empty'             => [['layout' => ''], 'config[errors][layout] must be'],
-            'layout is not a string'      => [['layout' => 42], 'config[errors][layout] must be'],
-            'debug is a string'           => [['debug' => 'true'], 'config[errors][debug] must be a boolean'],
-            'debug is an integer'         => [['debug' => 1], 'config[errors][debug] must be a boolean'],
-        ];
+        self::assertNull(ErrorPageOptions::fromConfig(['layout' => null])->layout);
     }
 }

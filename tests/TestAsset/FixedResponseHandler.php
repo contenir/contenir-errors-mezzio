@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Contenir\Errors\Mezzio\Test\TestAsset;
+namespace Contenir\Errors\Mezzio\Tests\TestAsset;
 
 use Override;
 use Psr\Http\Message\ResponseInterface;

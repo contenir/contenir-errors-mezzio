@@ -50,21 +50,19 @@ final readonly class ErrorPageOptions
     /**
      * @param array<array-key, mixed> $errors
      *
-     * @throws InvalidConfigurationException When the value is not a non-empty string.
+     * @throws InvalidConfigurationException When the value is not a boolean.
      */
-    private static function viewTemplate(array $errors): string
+    private static function debug(array $errors): bool
     {
-        if (null === ($errors['view_template'] ?? null)) {
-            return self::DEFAULT_VIEW_TEMPLATE;
+        if (null === ($errors['debug'] ?? null)) {
+            return false;
         }
 
-        if (! is_string($errors['view_template']) || '' === $errors['view_template']) {
-            throw new InvalidConfigurationException(
-                'contenir/errors-mezzio: config[errors][view_template] must be a non-empty string.',
-            );
+        if (! is_bool($errors['debug'])) {
+            throw new InvalidConfigurationException('contenir/errors-mezzio: config[errors][debug] must be a boolean.');
         }
 
-        return $errors['view_template'];
+        return $errors['debug'];
     }
 
     /**
@@ -94,18 +92,20 @@ final readonly class ErrorPageOptions
     /**
      * @param array<array-key, mixed> $errors
      *
-     * @throws InvalidConfigurationException When the value is not a boolean.
+     * @throws InvalidConfigurationException When the value is not a non-empty string.
      */
-    private static function debug(array $errors): bool
+    private static function viewTemplate(array $errors): string
     {
-        if (null === ($errors['debug'] ?? null)) {
-            return false;
+        if (null === ($errors['view_template'] ?? null)) {
+            return self::DEFAULT_VIEW_TEMPLATE;
         }
 
-        if (! is_bool($errors['debug'])) {
-            throw new InvalidConfigurationException('contenir/errors-mezzio: config[errors][debug] must be a boolean.');
+        if (! is_string($errors['view_template']) || '' === $errors['view_template']) {
+            throw new InvalidConfigurationException(
+                'contenir/errors-mezzio: config[errors][view_template] must be a non-empty string.',
+            );
         }
 
-        return $errors['debug'];
+        return $errors['view_template'];
     }
 }

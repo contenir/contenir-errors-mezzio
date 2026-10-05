@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Contenir\Errors\Mezzio\Test\Integration\LaminasView;
+namespace Contenir\Errors\Mezzio\Tests\Integration\LaminasView;
 
 use Contenir\Errors\Mezzio\LaminasView\PlaceholderReset;
 use Laminas\View\Helper\HeadMeta;

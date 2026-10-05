@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Contenir\Errors\Mezzio\Test\Unit;
+namespace Contenir\Errors\Mezzio\Tests\Unit;
 
 use Contenir\Errors\Mezzio\ConfigProvider;
 use Contenir\Errors\Mezzio\ErrorPageMiddleware;

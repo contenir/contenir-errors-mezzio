@@ -11,9 +11,9 @@
         "middleware"
     ],
     "require": {
-        "php": "^8.3",
-        "contenir/config": "^0.1",
-        "contenir/errors": "^0.1",
+        "php": "~8.3.0 || ~8.4.0 || ~8.5.0",
+        "contenir/config": "^0.2 || ^2.0",
+        "contenir/errors": "^0.1.1 || ^2.0",
         "laminas/laminas-diactoros": "^3.0",
         "mezzio/mezzio-template": "^2.0",
         "psr/container": "^1.1 || ^2.0",
@@ -24,13 +24,11 @@
     "require-dev": {
         "laminas/laminas-view": "^2.30",
         "php-db/phpdb-qa-tools": "0.1.x-dev",
-        "phpunit/phpunit": "^11.5"
+        "phpunit/phpunit": "^11.5.42"
     },
     "suggest": {
         "laminas/laminas-view": "Clears its head and script placeholders before the error page renders (mezzio-laminasviewrenderer sites)"
     },
-    "minimum-stability": "dev",
-    "prefer-stable": true,
     "autoload": {
         "psr-4": {
             "Contenir\\Errors\\Mezzio\\": "src/"
@@ -38,44 +36,15 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "Contenir\\Errors\\Mezzio\\Test\\": "test/"
-        }
-    },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "../contenir-errors",
-            "canonical": false,
-            "options": {
-                "symlink": true
-            }
-        },
-        {
-            "type": "path",
-            "url": "../contenir-config",
-            "canonical": false,
-            "options": {
-                "symlink": true
-            }
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/contenir/errors"
-        },
-        {
-            "type": "vcs",
-            "url": "https://github.com/contenir/config"
-        }
-    ],
-    "extra": {
-        "laminas": {
-            "config-provider": "Contenir\\Errors\\Mezzio\\ConfigProvider"
+            "Contenir\\Errors\\Mezzio\\Tests\\": "tests/"
         }
     },
     "scripts": {
         "check": [
-            "@quality",
-            "@test"
+            "@cs-check",
+            "@static-analysis",
+            "@test",
+            "@test-integration"
         ],
         "cs-check": [
             "mago format --check",
@@ -85,32 +54,25 @@
             "mago format",
             "mago lint --fix"
         ],
-        "analyze": "mago analyze",
-        "quality": [
-            "@cs-check",
-            "@analyze"
-        ],
-        "quality:fix": [
-            "@cs-fix",
-            "@quality"
-        ],
-        "test": "phpunit --colors=always",
-        "test:unit": "phpunit --colors=always --testsuite unit",
-        "test:integration": "phpunit --colors=always --testsuite integration",
-        "test-coverage": "XDEBUG_MODE=coverage phpunit --colors=always --coverage-clover clover.xml --coverage-text",
-        "pre-commit": [
-            "@quality",
-            "@test"
-        ],
-        "ci": [
-            "@quality",
-            "@test"
-        ]
+        "static-analysis": "mago analyze",
+        "test": "phpunit --colors=always --testsuite unit",
+        "test-integration": "phpunit --colors=always --testsuite integration",
+        "test-coverage": "phpunit --colors=always --coverage-clover clover.xml"
     },
     "config": {
-        "sort-packages": true,
         "platform": {
-            "php": "8.3.22"
+            "php": "8.3.99"
+        },
+        "sort-packages": true
+    },
+    "extra": {
+        "laminas": {
+            "config-provider": "Contenir\\Errors\\Mezzio\\ConfigProvider"
+        },
+        "branch-alias": {
+            "dev-main": "2.0.x-dev"
         }
-    }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
