@@ -267,6 +267,7 @@ composer static-analysis   # mago analyze
 composer test              # unit suite: middleware, options and factory with doubles, no I/O
 composer test-integration  # integration suite: real pages files, laminas-view and the bundled template
 composer test-coverage     # both suites, clover.xml for Codecov
+composer mutation-test     # Infection mutation testing over both suites
 ```
 
 ## License
