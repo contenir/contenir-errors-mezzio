@@ -15,6 +15,21 @@ use function realpath;
 #[Group('unit')]
 final class ConfigProviderTest extends TestCase
 {
+    public function testExposesTheDependenciesForDirectUse(): void
+    {
+        self::assertSame(
+            ['factories' => [ErrorPageMiddleware::class => ErrorPageMiddlewareFactory::class]],
+            (new ConfigProvider())->getDependencies(),
+        );
+    }
+
+    public function testExposesTheTemplatePathsForDirectUse(): void
+    {
+        $paths = (new ConfigProvider())->getTemplates()['paths'][ConfigProvider::TEMPLATE_NAMESPACE];
+
+        self::assertSame([realpath(__DIR__ . '/../../templates')], [realpath($paths[0])]);
+    }
+
     public function testRegistersTheMiddlewareFactory(): void
     {
         self::assertSame(

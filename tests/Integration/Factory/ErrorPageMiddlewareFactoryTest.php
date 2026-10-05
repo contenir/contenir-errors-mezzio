@@ -31,6 +31,23 @@ final class ErrorPageMiddlewareFactoryTest extends TestCase
 
     private string $originalWorkingDirectory;
 
+    public function testAnchorsTheDefaultErrorsFileToTheWorkingDirectoryAtBuildTime(): void
+    {
+        mkdir("{$this->temporaryDirectory}/config");
+        mkdir("{$this->temporaryDirectory}/config/autoload");
+        mkdir("{$this->temporaryDirectory}/elsewhere");
+        $this->writeConfigFile('config/autoload/errors.local.php', [
+            'errors' => ['pages' => [404 => ['title' => 'Build-time location', 'body' => '']]],
+        ]);
+        chdir($this->temporaryDirectory);
+        $middleware = $this->create([]);
+        chdir("{$this->temporaryDirectory}/elsewhere");
+
+        $this->process($middleware);
+
+        self::assertSame('Build-time location', ((array) $this->renderer->renderedParams)['title'] ?? null);
+    }
+
     public function testFallsBackToARelativeErrorsFileWhenTheWorkingDirectoryIsGone(): void
     {
         $vanished = "{$this->temporaryDirectory}/vanished";

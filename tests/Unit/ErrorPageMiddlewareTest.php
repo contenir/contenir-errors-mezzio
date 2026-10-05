@@ -75,6 +75,7 @@ final class ErrorPageMiddlewareTest extends TestCase
     public static function loggedStatusProvider(): array
     {
         return [
+            'first client error as info'     => [400, LogLevel::INFO],
             'forbidden as info'              => [403, LogLevel::INFO],
             'not found as info'              => [404, LogLevel::INFO],
             'unconfigured client error'      => [410, LogLevel::INFO],
