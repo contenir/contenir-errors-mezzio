@@ -18,6 +18,7 @@ use Laminas\Diactoros\Response\JsonResponse;
 use Laminas\Diactoros\ServerRequest;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use Psr\Log\LogLevel;
@@ -125,91 +126,101 @@ final class ErrorPageMiddlewareTest extends TestCase
         ];
     }
 
-    public function testClearsViewStateBeforeRenderingThePage(): void
+    #[Test]
+    public function clearsViewStateBeforeRenderingThePage(): void
     {
         $reset      = new CountingViewStateReset();
         $middleware = new ErrorPageMiddleware($this->repository, $this->renderer, viewStateReset: $reset);
 
         $this->process($middleware, new HtmlResponse('', 404));
 
-        self::assertSame(1, $reset->resets);
+        static::assertSame(1, $reset->resets);
     }
 
-    public function testDoesNotLogASuccessfulResponse(): void
+    #[Test]
+    public function doesNotLogASuccessfulResponse(): void
     {
         $logger     = new InMemoryLogger();
         $middleware = new ErrorPageMiddleware($this->repository, $this->renderer, logger: $logger);
 
         $this->process($middleware, new HtmlResponse('', 200));
 
-        self::assertSame([], $logger->records);
+        static::assertSame([], $logger->records);
     }
 
-    public function testDropsTheContentLengthOfTheOriginalBody(): void
+    #[Test]
+    public function dropsTheContentLengthOfTheOriginalBody(): void
     {
         $response = $this->process($this->middleware(), new HtmlResponse('Not Found', 404, ['Content-Length' => '9']));
 
-        self::assertFalse($response->hasHeader('Content-Length'));
+        static::assertFalse($response->hasHeader('Content-Length'));
     }
 
-    public function testKeepsOtherHeaders(): void
+    #[Test]
+    public function keepsOtherHeaders(): void
     {
         $response = $this->process($this->middleware(), new HtmlResponse('', 403, ['X-Request-Id' => 'abc123']));
 
-        self::assertSame('abc123', $response->getHeaderLine('X-Request-Id'));
+        static::assertSame('abc123', $response->getHeaderLine('X-Request-Id'));
     }
 
+    #[Test]
     #[DataProvider('configuredErrorStatusProvider')]
-    public function testKeepsTheStatusCode(int $status): void
+    public function keepsTheStatusCode(int $status): void
     {
         $response = $this->process($this->middleware(), new HtmlResponse('', $status));
 
-        self::assertSame($status, $response->getStatusCode());
+        static::assertSame($status, $response->getStatusCode());
     }
 
-    public function testLeavesTheLayoutToTheRendererByDefault(): void
+    #[Test]
+    public function leavesTheLayoutToTheRendererByDefault(): void
     {
         $this->process($this->middleware(), new HtmlResponse('', 404));
 
-        self::assertArrayNotHasKey('layout', (array) $this->renderer->renderedParams);
+        static::assertArrayNotHasKey('layout', (array) $this->renderer->renderedParams);
     }
 
+    #[Test]
     #[DataProvider('untouchedResponseProvider')]
-    public function testLeavesViewStateAloneWhenThePageIsNotRendered(ResponseInterface $response): void
+    public function leavesViewStateAloneWhenThePageIsNotRendered(ResponseInterface $response): void
     {
         $reset      = new CountingViewStateReset();
         $middleware = new ErrorPageMiddleware($this->repository, $this->renderer, viewStateReset: $reset);
 
         $this->process($middleware, $response);
 
-        self::assertSame(0, $reset->resets);
+        static::assertSame(0, $reset->resets);
     }
 
+    #[Test]
     #[DataProvider('loggedStatusProvider')]
-    public function testLogsAnErrorStatus(int $status, string $level): void
+    public function logsAnErrorStatus(int $status, string $level): void
     {
         $logger     = new InMemoryLogger();
         $middleware = new ErrorPageMiddleware($this->repository, $this->renderer, logger: $logger);
 
         $this->process($middleware, new HtmlResponse('', $status));
 
-        self::assertSame(
+        static::assertSame(
             [['level' => $level, 'message' => "HTTP {$status} at " . self::URI, 'context' => []]],
             $logger->records,
         );
     }
 
-    public function testLogsANonHtmlError(): void
+    #[Test]
+    public function logsANonHtmlError(): void
     {
         $logger     = new InMemoryLogger();
         $middleware = new ErrorPageMiddleware($this->repository, $this->renderer, logger: $logger);
 
         $this->process($middleware, new JsonResponse([], 404));
 
-        self::assertCount(1, $logger->records);
+        static::assertCount(1, $logger->records);
     }
 
-    public function testLogsInDebugMode(): void
+    #[Test]
+    public function logsInDebugMode(): void
     {
         $logger     = new InMemoryLogger();
         $middleware = new ErrorPageMiddleware(
@@ -221,18 +232,20 @@ final class ErrorPageMiddlewareTest extends TestCase
 
         $this->process($middleware, new HtmlResponse('', 500));
 
-        self::assertCount(1, $logger->records);
+        static::assertCount(1, $logger->records);
     }
 
-    public function testMarksTheRenderedPageAsNotCacheable(): void
+    #[Test]
+    public function marksTheRenderedPageAsNotCacheable(): void
     {
         $response = $this->process($this->middleware(), new HtmlResponse('', 404, ['Cache-Control' => 'public']));
 
-        self::assertSame('no-store', $response->getHeaderLine('Cache-Control'));
+        static::assertSame('no-store', $response->getHeaderLine('Cache-Control'));
     }
 
+    #[Test]
     #[DataProvider('layoutProvider')]
-    public function testPassesAConfiguredLayoutToTheRenderer(string|false $layout): void
+    public function passesAConfiguredLayoutToTheRenderer(string|false $layout): void
     {
         $middleware = new ErrorPageMiddleware(
             $this->repository,
@@ -242,15 +255,16 @@ final class ErrorPageMiddlewareTest extends TestCase
 
         $this->process($middleware, new HtmlResponse('', 404));
 
-        self::assertSame($layout, ((array) $this->renderer->renderedParams)['layout'] ?? null);
+        static::assertSame($layout, ((array) $this->renderer->renderedParams)['layout'] ?? null);
     }
 
+    #[Test]
     #[DataProvider('configuredErrorStatusProvider')]
-    public function testRendersTheConfiguredPageForAnErrorStatus(int $status): void
+    public function rendersTheConfiguredPageForAnErrorStatus(int $status): void
     {
         $this->process($this->middleware(), new HtmlResponse('', $status));
 
-        self::assertSame(
+        static::assertSame(
             [
                 'status' => $status,
                 'title'  => $this->repository->get($status)?->title,
@@ -260,7 +274,8 @@ final class ErrorPageMiddlewareTest extends TestCase
         );
     }
 
-    public function testRendersTheConfiguredTemplate(): void
+    #[Test]
+    public function rendersTheConfiguredTemplate(): void
     {
         $middleware = new ErrorPageMiddleware(
             $this->repository,
@@ -270,18 +285,20 @@ final class ErrorPageMiddlewareTest extends TestCase
 
         $this->process($middleware, new HtmlResponse('', 404));
 
-        self::assertSame('error::site', $this->renderer->renderedTemplate);
+        static::assertSame('error::site', $this->renderer->renderedTemplate);
     }
 
-    public function testRendersTheDefaultTemplate(): void
+    #[Test]
+    public function rendersTheDefaultTemplate(): void
     {
         $this->process($this->middleware(), new HtmlResponse('', 404));
 
-        self::assertSame('contenir-errors::fault', $this->renderer->renderedTemplate);
+        static::assertSame('contenir-errors::fault', $this->renderer->renderedTemplate);
     }
 
+    #[Test]
     #[DataProvider('htmlContentTypeProvider')]
-    public function testRendersThePageForAnHtmlContentType(string $contentType): void
+    public function rendersThePageForAnHtmlContentType(string $contentType): void
     {
         $response = $this->process($this->middleware(), new Response(
             status: 404,
@@ -290,14 +307,15 @@ final class ErrorPageMiddlewareTest extends TestCase
             ],
         ));
 
-        self::assertSame('no-store', $response->getHeaderLine('Cache-Control'));
+        static::assertSame('no-store', $response->getHeaderLine('Cache-Control'));
     }
 
-    public function testReplacesTheBodyWithTheRenderedTemplate(): void
+    #[Test]
+    public function replacesTheBodyWithTheRenderedTemplate(): void
     {
         $response = $this->process($this->middleware(), new HtmlResponse('<p>Framework 404</p>', 404));
 
-        self::assertSame(
+        static::assertSame(
             $this->renderer->render('contenir-errors::fault', [
                 'status' => 404,
                 'title'  => 'Not found',
@@ -307,25 +325,28 @@ final class ErrorPageMiddlewareTest extends TestCase
         );
     }
 
-    public function testReturnsAJsonErrorUntouched(): void
+    #[Test]
+    public function returnsAJsonErrorUntouched(): void
     {
         $response = new JsonResponse(['error' => 'Not found'], 404);
 
-        self::assertSame($response, $this->process($this->middleware(), $response));
+        static::assertSame($response, $this->process($this->middleware(), $response));
     }
 
+    #[Test]
     #[DataProvider('nonHtmlContentTypeProvider')]
-    public function testReturnsResponseUntouchedForANonHtmlContentType(string $contentType): void
+    public function returnsResponseUntouchedForANonHtmlContentType(string $contentType): void
     {
         $response = new Response(
             status: 404,
             headers: ['Content-Type' => $contentType],
         );
 
-        self::assertSame($response, $this->process($this->middleware(), $response));
+        static::assertSame($response, $this->process($this->middleware(), $response));
     }
 
-    public function testReturnsResponseUntouchedInDebugMode(): void
+    #[Test]
+    public function returnsResponseUntouchedInDebugMode(): void
     {
         $middleware = new ErrorPageMiddleware(
             $this->repository,
@@ -334,37 +355,41 @@ final class ErrorPageMiddlewareTest extends TestCase
         );
         $response = new HtmlResponse('<h1>Whoops</h1>', 500);
 
-        self::assertSame($response, $this->process($middleware, $response));
+        static::assertSame($response, $this->process($middleware, $response));
     }
 
-    public function testReturnsResponseUntouchedWhenNoPageIsConfiguredForTheStatus(): void
+    #[Test]
+    public function returnsResponseUntouchedWhenNoPageIsConfiguredForTheStatus(): void
     {
         $response = new HtmlResponse('<p>Gone</p>', 410);
 
-        self::assertSame($response, $this->process($this->middleware(), $response));
+        static::assertSame($response, $this->process($this->middleware(), $response));
     }
 
+    #[Test]
     #[DataProvider('successfulStatusProvider')]
-    public function testReturnsResponseUntouchedWhenStatusIsBelow400(int $status): void
+    public function returnsResponseUntouchedWhenStatusIsBelow400(int $status): void
     {
         $response = new HtmlResponse('<p>Fine</p>', $status);
 
-        self::assertSame($response, $this->process($this->middleware(), $response));
+        static::assertSame($response, $this->process($this->middleware(), $response));
     }
 
-    public function testReturnsResponseUntouchedWhenTheConfiguredPageIsEmpty(): void
+    #[Test]
+    public function returnsResponseUntouchedWhenTheConfiguredPageIsEmpty(): void
     {
         $middleware = new ErrorPageMiddleware(new InMemoryRepository([new ErrorPage(404, '', '')]), $this->renderer);
         $response   = new HtmlResponse('<p>Framework 404</p>', 404);
 
-        self::assertSame($response, $this->process($middleware, $response));
+        static::assertSame($response, $this->process($middleware, $response));
     }
 
-    public function testSetsAnHtmlContentType(): void
+    #[Test]
+    public function setsAnHtmlContentType(): void
     {
         $response = $this->process($this->middleware(), new Response(status: 500));
 
-        self::assertSame('text/html; charset=utf-8', $response->getHeaderLine('Content-Type'));
+        static::assertSame('text/html; charset=utf-8', $response->getHeaderLine('Content-Type'));
     }
 
     protected function setUp(): void

@@ -14,6 +14,7 @@ use Laminas\Diactoros\Response\HtmlResponse;
 use Laminas\Diactoros\ServerRequest;
 use Mezzio\Template\TemplateRendererInterface;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 use function chdir;
@@ -31,7 +32,8 @@ final class ErrorPageMiddlewareFactoryTest extends TestCase
 
     private string $originalWorkingDirectory;
 
-    public function testAnchorsTheDefaultErrorsFileToTheWorkingDirectoryAtBuildTime(): void
+    #[Test]
+    public function anchorsTheDefaultErrorsFileToTheWorkingDirectoryAtBuildTime(): void
     {
         mkdir("{$this->temporaryDirectory}/config");
         mkdir("{$this->temporaryDirectory}/config/autoload");
@@ -45,10 +47,11 @@ final class ErrorPageMiddlewareFactoryTest extends TestCase
 
         $this->process($middleware);
 
-        self::assertSame('Build-time location', ((array) $this->renderer->renderedParams)['title'] ?? null);
+        static::assertSame('Build-time location', ((array) $this->renderer->renderedParams)['title'] ?? null);
     }
 
-    public function testFallsBackToARelativeErrorsFileWhenTheWorkingDirectoryIsGone(): void
+    #[Test]
+    public function fallsBackToARelativeErrorsFileWhenTheWorkingDirectoryIsGone(): void
     {
         $vanished = "{$this->temporaryDirectory}/vanished";
         mkdir($vanished);
@@ -57,10 +60,11 @@ final class ErrorPageMiddlewareFactoryTest extends TestCase
 
         $this->process($this->create([]));
 
-        self::assertNull($this->renderer->renderedParams);
+        static::assertNull($this->renderer->renderedParams);
     }
 
-    public function testReadsPagesFromTheConfiguredFile(): void
+    #[Test]
+    public function readsPagesFromTheConfiguredFile(): void
     {
         $file = $this->writeConfigFile('pages.php', [
             'errors' => ['pages' => [404 => ['title' => 'Not Found', 'body' => '']]],
@@ -68,10 +72,11 @@ final class ErrorPageMiddlewareFactoryTest extends TestCase
 
         $this->process($this->create(['file' => $file]));
 
-        self::assertSame('Not Found', ((array) $this->renderer->renderedParams)['title'] ?? null);
+        static::assertSame('Not Found', ((array) $this->renderer->renderedParams)['title'] ?? null);
     }
 
-    public function testReadsPagesFromTheSiteAutoloadFileByDefault(): void
+    #[Test]
+    public function readsPagesFromTheSiteAutoloadFileByDefault(): void
     {
         mkdir("{$this->temporaryDirectory}/config");
         mkdir("{$this->temporaryDirectory}/config/autoload");
@@ -82,7 +87,7 @@ final class ErrorPageMiddlewareFactoryTest extends TestCase
 
         $this->process($this->create([]));
 
-        self::assertSame('Default location', ((array) $this->renderer->renderedParams)['title'] ?? null);
+        static::assertSame('Default location', ((array) $this->renderer->renderedParams)['title'] ?? null);
     }
 
     protected function setUp(): void

@@ -20,6 +20,7 @@ use Laminas\Diactoros\ServerRequest;
 use Mezzio\Template\TemplateRendererInterface;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 use stdClass;
@@ -68,44 +69,50 @@ final class ErrorPageMiddlewareFactoryTest extends TestCase
         ];
     }
 
-    public function testCreatesTheMiddlewareWithoutAConfigService(): void
+    #[Test]
+    public function createsTheMiddlewareWithoutAConfigService(): void
     {
-        self::assertInstanceOf(ErrorPageMiddleware::class, (new ErrorPageMiddlewareFactory())($this->container));
+        static::assertInstanceOf(ErrorPageMiddleware::class, (new ErrorPageMiddlewareFactory())($this->container));
     }
 
-    public function testLeavesTheLayoutToTheRendererByDefault(): void
+    #[Test]
+    public function leavesTheLayoutToTheRendererByDefault(): void
     {
         $this->process($this->create(), 404);
 
-        self::assertArrayNotHasKey('layout', (array) $this->renderer->renderedParams);
+        static::assertArrayNotHasKey('layout', (array) $this->renderer->renderedParams);
     }
 
-    public function testLeavesTheResponseUntouchedWhenDebugIsOn(): void
+    #[Test]
+    public function leavesTheResponseUntouchedWhenDebugIsOn(): void
     {
         $response = $this->process($this->create(['debug' => true]), 404);
 
-        self::assertSame('', (string) $response->getBody());
+        static::assertSame('', (string) $response->getBody());
     }
 
-    public function testLogsToTheConfiguredLoggerService(): void
+    #[Test]
+    public function logsToTheConfiguredLoggerService(): void
     {
         $logger = new InMemoryLogger();
         $this->container->setService('log.psr3', $logger);
 
         $this->process($this->create(['logger' => 'log.psr3']), 404);
 
-        self::assertCount(1, $logger->records);
+        static::assertCount(1, $logger->records);
     }
 
+    #[Test]
     #[DataProvider('layoutProvider')]
-    public function testPassesTheConfiguredLayoutToTheRenderer(string|false $layout): void
+    public function passesTheConfiguredLayoutToTheRenderer(string|false $layout): void
     {
         $this->process($this->create(['layout' => $layout]), 404);
 
-        self::assertSame($layout, ((array) $this->renderer->renderedParams)['layout'] ?? null);
+        static::assertSame($layout, ((array) $this->renderer->renderedParams)['layout'] ?? null);
     }
 
-    public function testRejectsALoggerServiceThatIsNotALogger(): void
+    #[Test]
+    public function rejectsALoggerServiceThatIsNotALogger(): void
     {
         $this->container->setService('config', ['errors' => ['logger' => 'not.a.logger']]);
         $this->container->setService('not.a.logger', new stdClass());
@@ -118,8 +125,9 @@ final class ErrorPageMiddlewareFactoryTest extends TestCase
         (new ErrorPageMiddlewareFactory())($this->container);
     }
 
+    #[Test]
     #[DataProvider('invalidFileProvider')]
-    public function testRejectsAnInvalidFileWhenNoRepositoryIsRegistered(mixed $file): void
+    public function rejectsAnInvalidFileWhenNoRepositoryIsRegistered(mixed $file): void
     {
         $container = new InMemoryContainer([
             TemplateRendererInterface::class => $this->renderer,
@@ -132,8 +140,9 @@ final class ErrorPageMiddlewareFactoryTest extends TestCase
         (new ErrorPageMiddlewareFactory())($container);
     }
 
+    #[Test]
     #[DataProvider('invalidErrorsConfigProvider')]
-    public function testRejectsInvalidConfiguration(mixed $errors, string $message): void
+    public function rejectsInvalidConfiguration(mixed $errors, string $message): void
     {
         $this->container->setService('config', ['errors' => $errors]);
 
@@ -143,41 +152,46 @@ final class ErrorPageMiddlewareFactoryTest extends TestCase
         (new ErrorPageMiddlewareFactory())($this->container);
     }
 
-    public function testRendersPagesFromTheRegisteredRepository(): void
+    #[Test]
+    public function rendersPagesFromTheRegisteredRepository(): void
     {
         $this->process($this->create(), 404);
 
-        self::assertSame('Not found', ((array) $this->renderer->renderedParams)['title'] ?? null);
+        static::assertSame('Not found', ((array) $this->renderer->renderedParams)['title'] ?? null);
     }
 
-    public function testRendersTheConfiguredTemplate(): void
+    #[Test]
+    public function rendersTheConfiguredTemplate(): void
     {
         $this->process($this->create(['view_template' => 'error::fault']), 404);
 
-        self::assertSame('error::fault', $this->renderer->renderedTemplate);
+        static::assertSame('error::fault', $this->renderer->renderedTemplate);
     }
 
-    public function testRendersTheDefaultTemplateWhenNoneIsConfigured(): void
+    #[Test]
+    public function rendersTheDefaultTemplateWhenNoneIsConfigured(): void
     {
         $this->process($this->create(), 404);
 
-        self::assertSame('contenir-errors::fault', $this->renderer->renderedTemplate);
+        static::assertSame('contenir-errors::fault', $this->renderer->renderedTemplate);
     }
 
-    public function testRendersThePageWhenDebugIsOff(): void
+    #[Test]
+    public function rendersThePageWhenDebugIsOff(): void
     {
         $response = $this->process($this->create(['debug' => false]), 404);
 
-        self::assertSame('no-store', $response->getHeaderLine('Cache-Control'));
+        static::assertSame('no-store', $response->getHeaderLine('Cache-Control'));
     }
 
-    public function testTreatsANonArrayConfigServiceAsEmpty(): void
+    #[Test]
+    public function treatsANonArrayConfigServiceAsEmpty(): void
     {
         $this->container->setService('config', 'not an array');
 
         $this->process((new ErrorPageMiddlewareFactory())($this->container), 404);
 
-        self::assertSame(ErrorPageOptions::DEFAULT_VIEW_TEMPLATE, $this->renderer->renderedTemplate);
+        static::assertSame(ErrorPageOptions::DEFAULT_VIEW_TEMPLATE, $this->renderer->renderedTemplate);
     }
 
     protected function setUp(): void

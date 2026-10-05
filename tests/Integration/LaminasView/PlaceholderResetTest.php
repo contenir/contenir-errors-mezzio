@@ -10,6 +10,7 @@ use Laminas\View\Helper\HeadTitle;
 use Laminas\View\Helper\InlineScript;
 use Laminas\View\Renderer\PhpRenderer;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 use function count;
@@ -17,7 +18,8 @@ use function count;
 #[Group('integration')]
 final class PlaceholderResetTest extends TestCase
 {
-    public function testEmptiesTheHeadAndScriptPlaceholders(): void
+    #[Test]
+    public function emptiesTheHeadAndScriptPlaceholders(): void
     {
         $helpers = (new PhpRenderer())->getHelperPluginManager();
         $helpers->get(HeadTitle::class)->append('Page not found');
@@ -26,7 +28,7 @@ final class PlaceholderResetTest extends TestCase
 
         (new PlaceholderReset($helpers))->reset();
 
-        self::assertSame([0, 0, 0], [
+        static::assertSame([0, 0, 0], [
             count($helpers->get(HeadTitle::class)->getContainer()),
             count($helpers->get(HeadMeta::class)->getContainer()),
             count($helpers->get(InlineScript::class)->getContainer()),

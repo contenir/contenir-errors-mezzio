@@ -13,6 +13,7 @@ use Contenir\Errors\Repository\FileRepository;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Laminas\Diactoros\ServerRequest;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 use Psr\Http\Message\ResponseInterface;
 
@@ -24,7 +25,8 @@ final class ErrorPageMiddlewareTest extends TestCase
 
     private FakeTemplateRenderer $renderer;
 
-    public function testPicksUpAPageSavedAfterTheMiddlewareWasBuilt(): void
+    #[Test]
+    public function picksUpAPageSavedAfterTheMiddlewareWasBuilt(): void
     {
         $repository = new FileRepository("{$this->temporaryDirectory}/errors.local.php");
         $middleware = new ErrorPageMiddleware($repository, $this->renderer);
@@ -32,10 +34,11 @@ final class ErrorPageMiddlewareTest extends TestCase
         $repository->save(new ErrorPage(403, 'Not Allowed', '<p>Members only.</p>'));
         $this->processWith($middleware, 403);
 
-        self::assertSame('Not Allowed', ((array) $this->renderer->renderedParams)['title'] ?? null);
+        static::assertSame('Not Allowed', ((array) $this->renderer->renderedParams)['title'] ?? null);
     }
 
-    public function testRendersAPageReadFromTheErrorsFile(): void
+    #[Test]
+    public function rendersAPageReadFromTheErrorsFile(): void
     {
         $file = $this->writeConfigFile('errors.local.php', [
             'errors' => ['pages' => [404 => ['title' => 'Not Found', 'body' => 'Missing or outdated.']]],
@@ -43,17 +46,18 @@ final class ErrorPageMiddlewareTest extends TestCase
 
         $this->process(new FileRepository($file), 404);
 
-        self::assertSame(
+        static::assertSame(
             ['status' => 404, 'title' => 'Not Found', 'body' => 'Missing or outdated.'],
             $this->renderer->renderedParams,
         );
     }
 
-    public function testReturnsResponseUntouchedWhenTheErrorsFileIsMissing(): void
+    #[Test]
+    public function returnsResponseUntouchedWhenTheErrorsFileIsMissing(): void
     {
         $response = $this->process(new FileRepository("{$this->temporaryDirectory}/errors.local.php"), 500);
 
-        self::assertSame('', (string) $response->getBody());
+        static::assertSame('', (string) $response->getBody());
     }
 
     protected function setUp(): void

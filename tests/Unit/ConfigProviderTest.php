@@ -8,6 +8,7 @@ use Contenir\Errors\Mezzio\ConfigProvider;
 use Contenir\Errors\Mezzio\ErrorPageMiddleware;
 use Contenir\Errors\Mezzio\Factory\ErrorPageMiddlewareFactory;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 use function realpath;
@@ -15,33 +16,37 @@ use function realpath;
 #[Group('unit')]
 final class ConfigProviderTest extends TestCase
 {
-    public function testExposesTheDependenciesForDirectUse(): void
+    #[Test]
+    public function exposesTheDependenciesForDirectUse(): void
     {
-        self::assertSame(
+        static::assertSame(
             ['factories' => [ErrorPageMiddleware::class => ErrorPageMiddlewareFactory::class]],
             (new ConfigProvider())->getDependencies(),
         );
     }
 
-    public function testExposesTheTemplatePathsForDirectUse(): void
+    #[Test]
+    public function exposesTheTemplatePathsForDirectUse(): void
     {
         $paths = (new ConfigProvider())->getTemplates()['paths'][ConfigProvider::TEMPLATE_NAMESPACE];
 
-        self::assertSame([realpath(__DIR__ . '/../../templates')], [realpath($paths[0])]);
+        static::assertSame([realpath(__DIR__ . '/../../templates')], [realpath($paths[0])]);
     }
 
-    public function testRegistersTheMiddlewareFactory(): void
+    #[Test]
+    public function registersTheMiddlewareFactory(): void
     {
-        self::assertSame(
+        static::assertSame(
             [ErrorPageMiddleware::class => ErrorPageMiddlewareFactory::class],
             (new ConfigProvider())()['dependencies']['factories'],
         );
     }
 
-    public function testRegistersTheTemplateNamespaceAtTheBundledTemplates(): void
+    #[Test]
+    public function registersTheTemplateNamespaceAtTheBundledTemplates(): void
     {
         $paths = (new ConfigProvider())()['templates']['paths']['contenir-errors'];
 
-        self::assertSame([realpath(__DIR__ . '/../../templates')], [realpath($paths[0])]);
+        static::assertSame([realpath(__DIR__ . '/../../templates')], [realpath($paths[0])]);
     }
 }
