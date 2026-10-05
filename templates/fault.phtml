@@ -1,0 +1,32 @@
+<?php
+
+/**
+ * Default error-page template shipped by contenir/errors-mezzio.
+ *
+ * Variables (set by ErrorPageMiddleware):
+ *   $status int    HTTP status code (e.g. 404)
+ *   $title  string Plain-text title authored in admin
+ *   $body   string Sanitised HTML fragment (inline only)
+ *
+ * A content fragment, not a full document: by default it renders inside the
+ * site's normal layout so the error page keeps the site's header, footer and
+ * styles. If you set `errors.layout` to false, point `errors.view_template`
+ * at a template of your own that outputs a complete document.
+ *
+ * Override by setting `errors.view_template` to a Site-owned template name.
+ */
+
+$status = (int) ($status ?? 500);
+$title  = (string) ($title ?? '');
+$body   = (string) ($body ?? '');
+?>
+<section class="fault fault--<?= $status ?>">
+    <p class="fault__status"><?= $this->escapeHtml(sprintf('Error %d', $status)) ?></p>
+    <?php if ($title !== ''): ?>
+        <h1 class="fault__title"><?= $this->escapeHtml($title) ?></h1>
+    <?php endif ?>
+    <?php if ($body !== ''): ?>
+        <div class="fault__body"><?= $body /* trusted HTML authored by admin */ ?></div>
+    <?php endif ?>
+    <a class="fault__home" href="/">Return home</a>
+</section>
