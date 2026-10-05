@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Contenir\Errors\Mezzio\Test\Trait;
+namespace Contenir\Errors\Mezzio\Tests\Trait;
 
 use function array_diff;
 use function file_put_contents;
@@ -19,7 +19,7 @@ use function var_export;
  * Creates a throwaway directory for tests that read files, and removes it and
  * everything written to it again.
  */
-trait UsesTemporaryDirectory
+trait TemporaryDirectoryTrait
 {
     private string $temporaryDirectory;
 

@@ -2,14 +2,14 @@
 
 declare(strict_types=1);
 
-namespace Contenir\Errors\Mezzio\Test\Integration\Factory;
+namespace Contenir\Errors\Mezzio\Tests\Integration\Factory;
 
 use Contenir\Errors\ErrorPage;
 use Contenir\Errors\ErrorPageRepositoryInterface;
 use Contenir\Errors\Mezzio\Factory\ErrorPageMiddlewareFactory;
-use Contenir\Errors\Mezzio\Test\TestAsset\FakeTemplateRenderer;
-use Contenir\Errors\Mezzio\Test\TestAsset\FixedResponseHandler;
-use Contenir\Errors\Mezzio\Test\TestAsset\InMemoryContainer;
+use Contenir\Errors\Mezzio\Tests\TestAsset\FakeTemplateRenderer;
+use Contenir\Errors\Mezzio\Tests\TestAsset\FixedResponseHandler;
+use Contenir\Errors\Mezzio\Tests\TestAsset\InMemoryContainer;
 use Contenir\Errors\Repository\InMemoryRepository;
 use Laminas\Diactoros\Response\HtmlResponse;
 use Laminas\Diactoros\ServerRequest;

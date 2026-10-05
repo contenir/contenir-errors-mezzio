@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Contenir\Errors\Mezzio\Test\Integration\Template;
+namespace Contenir\Errors\Mezzio\Tests\Integration\Template;
 
 use Laminas\View\Model\ViewModel;
 use Laminas\View\Renderer\PhpRenderer;
@@ -19,22 +19,24 @@ use PHPUnit\Framework\TestCase;
 #[Group('template')]
 final class FaultTemplateTest extends TestCase
 {
+    /**
+     * @return array<string, array{int}>
+     */
+    public static function statusProvider(): array
+    {
+        return [
+            'forbidden'             => [403],
+            'not found'             => [404],
+            'internal server error' => [500],
+        ];
+    }
+
     public function testEscapesTheTitle(): void
     {
         $html = $this->render(404, '<script>alert(1)</script> & co', '');
 
         self::assertStringContainsString(
             '<h1 class="fault__title">&lt;script&gt;alert(1)&lt;/script&gt; &amp; co</h1>',
-            $html,
-        );
-    }
-
-    public function testRendersTheBodyAsAuthoredHtml(): void
-    {
-        $html = $this->render(404, 'Not found', '<p>Try the <a href="/">home page</a>.</p>');
-
-        self::assertStringContainsString(
-            '<div class="fault__body"><p>Try the <a href="/">home page</a>.</p></div>',
             $html,
         );
     }
@@ -51,16 +53,9 @@ final class FaultTemplateTest extends TestCase
         );
     }
 
-    /**
-     * @return array<string, array{int}>
-     */
-    public static function statusProvider(): array
+    public function testOmitsTheBodyWhenItIsEmpty(): void
     {
-        return [
-            'forbidden'             => [403],
-            'not found'             => [404],
-            'internal server error' => [500],
-        ];
+        self::assertStringNotContainsString('fault__body', $this->render(500, 'Title', ''));
     }
 
     public function testOmitsTheTitleWhenItIsEmpty(): void
@@ -68,9 +63,14 @@ final class FaultTemplateTest extends TestCase
         self::assertStringNotContainsString('fault__title', $this->render(500, '', '<p>Body</p>'));
     }
 
-    public function testOmitsTheBodyWhenItIsEmpty(): void
+    public function testRendersTheBodyAsAuthoredHtml(): void
     {
-        self::assertStringNotContainsString('fault__body', $this->render(500, 'Title', ''));
+        $html = $this->render(404, 'Not found', '<p>Try the <a href="/">home page</a>.</p>');
+
+        self::assertStringContainsString(
+            '<div class="fault__body"><p>Try the <a href="/">home page</a>.</p></div>',
+            $html,
+        );
     }
 
     private function render(int $status, string $title, string $body): string

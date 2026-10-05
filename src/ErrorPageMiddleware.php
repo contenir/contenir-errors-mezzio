@@ -85,28 +85,6 @@ final readonly class ErrorPageMiddleware implements MiddlewareInterface
         return $this->render($response, $page);
     }
 
-    private function render(ResponseInterface $response, ErrorPage $page): ResponseInterface
-    {
-        $params = [
-            'status' => $page->status,
-            'title'  => $page->title,
-            'body'   => $page->body,
-        ];
-
-        if (null !== $this->options->layout) {
-            $params['layout'] = $this->options->layout;
-        }
-
-        $this->viewStateReset?->reset();
-
-        $html = $this->renderer->render($this->options->viewTemplate, $params);
-
-        return $response->withBody((new StreamFactory())->createStream($html))
-            ->withoutHeader('Content-Length')
-            ->withHeader('Content-Type', 'text/html; charset=utf-8')
-            ->withHeader('Cache-Control', 'no-store');
-    }
-
     private function isHtml(ResponseInterface $response): bool
     {
         $contentType = strtolower($response->getHeaderLine('Content-Type'));
@@ -137,5 +115,27 @@ final readonly class ErrorPageMiddleware implements MiddlewareInterface
         }
 
         $this->logger->info($message);
+    }
+
+    private function render(ResponseInterface $response, ErrorPage $page): ResponseInterface
+    {
+        $params = [
+            'status' => $page->status,
+            'title'  => $page->title,
+            'body'   => $page->body,
+        ];
+
+        if (null !== $this->options->layout) {
+            $params['layout'] = $this->options->layout;
+        }
+
+        $this->viewStateReset?->reset();
+
+        $html = $this->renderer->render($this->options->viewTemplate, $params);
+
+        return $response->withBody((new StreamFactory())->createStream($html))
+            ->withoutHeader('Content-Length')
+            ->withHeader('Content-Type', 'text/html; charset=utf-8')
+            ->withHeader('Cache-Control', 'no-store');
     }
 }

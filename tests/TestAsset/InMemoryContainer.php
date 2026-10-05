@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Contenir\Errors\Mezzio\Test\TestAsset;
+namespace Contenir\Errors\Mezzio\Tests\TestAsset;
 
 use Override;
 use Psr\Container\ContainerInterface;
@@ -24,11 +24,6 @@ final class InMemoryContainer implements ContainerInterface
         private array $services = [],
     ) {}
 
-    public function setService(string $id, mixed $service): void
-    {
-        $this->services[$id] = $service;
-    }
-
     /**
      * @param string $id
      */
@@ -49,5 +44,10 @@ final class InMemoryContainer implements ContainerInterface
     public function has($id): bool
     {
         return array_key_exists($id, $this->services);
+    }
+
+    public function setService(string $id, mixed $service): void
+    {
+        $this->services[$id] = $service;
     }
 }
