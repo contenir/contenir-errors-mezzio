@@ -42,3 +42,16 @@ package (or its constraint) first.
 
 Projects that cannot move yet can stay on `^0.1`, which is maintained on the
 `0.x` branch.
+
+## Package renamed in 2.1
+
+From 2.1, the package is published as `contenir/contenir-errors-mezzio`. It declares
+`replace` for `contenir/errors-mezzio`, so the two can never be installed together.
+Its dependencies move to their renamed packages too: `contenir/contenir-errors`
+and `contenir/contenir-config`, both `^2.1`. Switch the requirement:
+
+```bash
+composer remove contenir/errors-mezzio && composer require contenir/contenir-errors-mezzio:^2.1
+```
+
+No code changes are needed: namespaces and classes are unchanged.

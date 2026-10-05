@@ -1,6 +1,6 @@
 {
-    "name": "contenir/errors-mezzio",
-    "description": "Mezzio (PSR-15) adapter for contenir/errors — renders admin-authored per-status pages for 4xx/5xx responses.",
+    "name": "contenir/contenir-errors-mezzio",
+    "description": "Mezzio (PSR-15) adapter for contenir/contenir-errors — renders admin-authored per-status pages for 4xx/5xx responses.",
     "type": "library",
     "license": "MIT",
     "keywords": [
@@ -12,8 +12,8 @@
     ],
     "require": {
         "php": "~8.3.0 || ~8.4.0 || ~8.5.0",
-        "contenir/config": "^0.2 || ^2.0",
-        "contenir/errors": "^0.1.1 || ^2.0",
+        "contenir/contenir-config": "^2.1",
+        "contenir/contenir-errors": "^2.1",
         "laminas/laminas-diactoros": "^3.0",
         "mezzio/mezzio-template": "^2.0",
         "psr/container": "^1.1 || ^2.0",
@@ -29,6 +29,9 @@
     },
     "suggest": {
         "laminas/laminas-view": "Clears its head and script placeholders before the error page renders (mezzio-laminasviewrenderer sites)"
+    },
+    "replace": {
+        "contenir/errors-mezzio": "self.version"
     },
     "autoload": {
         "psr-4": {
@@ -76,7 +79,7 @@
             "config-provider": "Contenir\\Errors\\Mezzio\\ConfigProvider"
         },
         "branch-alias": {
-            "dev-main": "2.0.x-dev"
+            "dev-main": "2.1.x-dev"
         }
     },
     "minimum-stability": "dev",
