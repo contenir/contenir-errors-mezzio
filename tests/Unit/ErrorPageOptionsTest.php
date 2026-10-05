@@ -8,6 +8,7 @@ use Contenir\Errors\Mezzio\ErrorPageOptions;
 use Contenir\Errors\Mezzio\Exception\InvalidConfigurationException;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 #[Group('unit')]
@@ -29,22 +30,25 @@ final class ErrorPageOptionsTest extends TestCase
         ];
     }
 
-    public function testAcceptsADisabledLayout(): void
+    #[Test]
+    public function acceptsADisabledLayout(): void
     {
-        self::assertFalse(ErrorPageOptions::fromConfig(['layout' => false])->layout);
+        static::assertFalse(ErrorPageOptions::fromConfig(['layout' => false])->layout);
     }
 
-    public function testAppliesTheDefaultsToAnEmptyConfig(): void
+    #[Test]
+    public function appliesTheDefaultsToAnEmptyConfig(): void
     {
-        self::assertEquals(
+        static::assertEquals(
             new ErrorPageOptions('contenir-errors::fault', null, false),
             ErrorPageOptions::fromConfig([]),
         );
     }
 
-    public function testReadsEveryKeyFromConfig(): void
+    #[Test]
+    public function readsEveryKeyFromConfig(): void
     {
-        self::assertEquals(
+        static::assertEquals(
             new ErrorPageOptions('error::fault', 'layout::error', true),
             ErrorPageOptions::fromConfig([
                 'view_template' => 'error::fault',
@@ -57,8 +61,9 @@ final class ErrorPageOptionsTest extends TestCase
     /**
      * @param array<string, mixed> $errors
      */
+    #[Test]
     #[DataProvider('invalidConfigProvider')]
-    public function testRejectsAValueOfTheWrongType(array $errors, string $message): void
+    public function rejectsAValueOfTheWrongType(array $errors, string $message): void
     {
         $this->expectException(InvalidConfigurationException::class);
         $this->expectExceptionMessage($message);
@@ -66,8 +71,9 @@ final class ErrorPageOptionsTest extends TestCase
         ErrorPageOptions::fromConfig($errors);
     }
 
-    public function testTreatsANullLayoutAsTheRendererDefault(): void
+    #[Test]
+    public function treatsANullLayoutAsTheRendererDefault(): void
     {
-        self::assertNull(ErrorPageOptions::fromConfig(['layout' => null])->layout);
+        static::assertNull(ErrorPageOptions::fromConfig(['layout' => null])->layout);
     }
 }

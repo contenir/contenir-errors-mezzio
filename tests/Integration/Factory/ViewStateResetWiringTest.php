@@ -18,6 +18,7 @@ use Laminas\View\HelperPluginManager;
 use Laminas\View\Renderer\PhpRenderer;
 use Mezzio\Template\TemplateRendererInterface;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 use function count;
@@ -26,7 +27,8 @@ use function count;
 #[Group('factory')]
 final class ViewStateResetWiringTest extends TestCase
 {
-    public function testClearsLaminasViewPlaceholdersWhenTheHelperManagerIsAvailable(): void
+    #[Test]
+    public function clearsLaminasViewPlaceholdersWhenTheHelperManagerIsAvailable(): void
     {
         $helpers = (new PhpRenderer())->getHelperPluginManager();
         $helpers->get(HeadTitle::class)->append('Page not found');
@@ -38,6 +40,6 @@ final class ViewStateResetWiringTest extends TestCase
         ]));
         $middleware->process(new ServerRequest(), new FixedResponseHandler(new HtmlResponse('', 404)));
 
-        self::assertSame(0, count($helpers->get(HeadTitle::class)->getContainer()));
+        static::assertSame(0, count($helpers->get(HeadTitle::class)->getContainer()));
     }
 }

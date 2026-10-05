@@ -9,6 +9,7 @@ use Laminas\View\Renderer\PhpRenderer;
 use Laminas\View\Resolver\TemplateMapResolver;
 use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Group;
+use PHPUnit\Framework\Attributes\Test;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -31,43 +32,48 @@ final class FaultTemplateTest extends TestCase
         ];
     }
 
-    public function testEscapesTheTitle(): void
+    #[Test]
+    public function escapesTheTitle(): void
     {
         $html = $this->render(404, '<script>alert(1)</script> & co', '');
 
-        self::assertStringContainsString(
+        static::assertStringContainsString(
             '<h1 class="fault__title">&lt;script&gt;alert(1)&lt;/script&gt; &amp; co</h1>',
             $html,
         );
     }
 
+    #[Test]
     #[DataProvider('statusProvider')]
-    public function testNamesTheStatus(int $status): void
+    public function namesTheStatus(int $status): void
     {
         $html = $this->render($status, 'Title', '');
 
-        self::assertStringContainsString(
+        static::assertStringContainsString(
             "<section class=\"fault fault--{$status}\">
     <p class=\"fault__status\">Error {$status}</p>",
             $html,
         );
     }
 
-    public function testOmitsTheBodyWhenItIsEmpty(): void
+    #[Test]
+    public function omitsTheBodyWhenItIsEmpty(): void
     {
-        self::assertStringNotContainsString('fault__body', $this->render(500, 'Title', ''));
+        static::assertStringNotContainsString('fault__body', $this->render(500, 'Title', ''));
     }
 
-    public function testOmitsTheTitleWhenItIsEmpty(): void
+    #[Test]
+    public function omitsTheTitleWhenItIsEmpty(): void
     {
-        self::assertStringNotContainsString('fault__title', $this->render(500, '', '<p>Body</p>'));
+        static::assertStringNotContainsString('fault__title', $this->render(500, '', '<p>Body</p>'));
     }
 
-    public function testRendersTheBodyAsAuthoredHtml(): void
+    #[Test]
+    public function rendersTheBodyAsAuthoredHtml(): void
     {
         $html = $this->render(404, 'Not found', '<p>Try the <a href="/">home page</a>.</p>');
 
-        self::assertStringContainsString(
+        static::assertStringContainsString(
             '<div class="fault__body"><p>Try the <a href="/">home page</a>.</p></div>',
             $html,
         );
