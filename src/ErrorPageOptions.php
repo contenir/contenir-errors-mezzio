@@ -59,7 +59,9 @@ final readonly class ErrorPageOptions
         }
 
         if (! is_bool($errors['debug'])) {
-            throw new InvalidConfigurationException('contenir/errors-mezzio: config[errors][debug] must be a boolean.');
+            throw new InvalidConfigurationException(
+                'contenir/contenir-errors-mezzio: config[errors][debug] must be a boolean.',
+            );
         }
 
         return $errors['debug'];
@@ -85,7 +87,7 @@ final readonly class ErrorPageOptions
         }
 
         throw new InvalidConfigurationException(
-            'contenir/errors-mezzio: config[errors][layout] must be null, false or a layout template name.',
+            'contenir/contenir-errors-mezzio: config[errors][layout] must be null, false or a layout template name.',
         );
     }
 
@@ -102,7 +104,7 @@ final readonly class ErrorPageOptions
 
         if (! is_string($errors['view_template']) || '' === $errors['view_template']) {
             throw new InvalidConfigurationException(
-                'contenir/errors-mezzio: config[errors][view_template] must be a non-empty string.',
+                'contenir/contenir-errors-mezzio: config[errors][view_template] must be a non-empty string.',
             );
         }
 

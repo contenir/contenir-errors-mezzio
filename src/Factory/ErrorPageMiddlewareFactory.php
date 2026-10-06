@@ -71,7 +71,7 @@ final class ErrorPageMiddlewareFactory
         }
 
         throw new InvalidConfigurationException(sprintf(
-            'contenir/errors-mezzio: config[errors][%s] must be %s.',
+            'contenir/contenir-errors-mezzio: config[errors][%s] must be %s.',
             $key,
             $expected,
         ));
@@ -84,7 +84,7 @@ final class ErrorPageMiddlewareFactory
     {
         if (! $service instanceof LoggerInterface) {
             throw new InvalidConfigurationException(sprintf(
-                'contenir/errors-mezzio: logger service "%s" must implement %s, got %s.',
+                'contenir/contenir-errors-mezzio: logger service "%s" must implement %s, got %s.',
                 $name,
                 LoggerInterface::class,
                 get_debug_type($service),
@@ -106,7 +106,9 @@ final class ErrorPageMiddlewareFactory
         }
 
         if (! is_array($config['errors'])) {
-            throw new InvalidConfigurationException('contenir/errors-mezzio: config[errors] must be an array.');
+            throw new InvalidConfigurationException(
+                'contenir/contenir-errors-mezzio: config[errors] must be an array.',
+            );
         }
 
         return $config['errors'];
